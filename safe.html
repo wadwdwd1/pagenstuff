@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Protected Page</title>
+</head>
+<body>
+    <h2>Enter the password to access the content:</h2>
+    <input type="password" id="pwdInput">
+    <button onclick="checkPassword()">Submit</button>
+
+    <div id="protectedContent" style="display:none;">
+        <h3>Welcome! You unlocked the secret page.</h3>
+        <p>This is the protected content.</p>
+    </div>
+
+    <script>
+        async function getDailyPassword() {
+            const today = new Date();
+            const dateStr = today.toISOString().slice(0, 10);
+            const encoder = new TextEncoder();
+            const data = encoder.encode(dateStr);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const base36Hash = hashArray.map(b => b.toString(36)).join('');
+            return base36Hash.slice(0, 10);
+        }
+
+        async function checkPassword() {
+            const input = document.getElementById('pwdInput').value;
+            const realPassword = await getDailyPassword();
+
+            if (input === realPassword) {
+                document.getElementById('protectedContent').style.display = 'block';
+            } else {
+                alert("Incorrect password.");
+            }
+        }
+    </script>
+</body>
+</html>
